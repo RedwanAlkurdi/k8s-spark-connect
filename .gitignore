@@ -8,7 +8,7 @@ values_EDP.yaml
 **/.DS_Store
 
 ### EDP CA
-EDP_CA/
+examples/EDP_CA/
 EDP_CA/**
 **/EDP_CA/
 **/EDP_CA/**
