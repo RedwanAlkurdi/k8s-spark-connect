@@ -137,7 +137,7 @@ jobs:
       - name: Upload charts to GHCR
         run: |
           for pkg in $(ls *.tgz); do
-            helm push ${pkg} oci://${{ env.HELM_REGISTRY }}/k8s-spark-connect
+            helm push ${pkg} oci://${{ env.HELM_REGISTRY }}/RedwanAlkurdi/k8s-spark-connect
           done
 
       - name: Save packaged charts to temp directory
