@@ -206,8 +206,8 @@ objectStorage:
   enabled: false
   
   # Object Storage endpoint URL
-  # Example: "https://minio-c2-api.sxp-1.nzero.net"
-  endpoint: "https://minio-c2-api.sxp-1.nzero.net"
+  # Example: "https://minio-c2-api.minio.net"
+  endpoint: ""
   
   # Secret configuration for Object Storage credentials
   secret:
@@ -225,7 +225,7 @@ objectStorage:
   
   # SSL trust configuration for Object Storage
   sslTrust:
-    # Whether to enable SSL trust configuration
+    # Whether to enable SSL trust configuration (if you're using a self-signed CA)
     # Possible values: true, false
     enabled: false
     
@@ -247,7 +247,7 @@ objectStorage:
       # Default password used by Java keytool
       password: "changeit"
 
-    # Bundle configuration for generating trust bundle
+    # Bundle configuration for generating trust bundle based of a kubernetes secret containing the CA certificate
     bundle:
       # Whether to create the Bundle resource
       # Possible values: true, false

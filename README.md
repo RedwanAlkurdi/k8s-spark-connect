@@ -40,29 +40,22 @@ For detailed configuration options, please refer to the [chart's README](charts/
 
 ## Architecture
 
-The chart deploys the following components:
+The chart deploys/configures the following components:
 
-1. Spark Connect StatefulSet
+1. Spark Connect
    - Runs the Spark Connect service
-   - Configures object storage integration
-   - Manages SSL trust configuration
    - Supports auto-scaling via Kubernetes as the Spark cluster manager
+   - Optional: Configures object storage integration
+   - Optional: Manages SSL trust configuration to object storage
+   - Optional: Integrates with Celeborn as an external shuffle service
+   - Optional: Integrates with Hive Metastore for metadata management
 
 2. NGINX Service (Optional)
-   - Provides SSL termination
+   - Provides SSL termination for the Grpc connections to the spark connect server
    - Routes traffic to Spark UI and Spark Connect
-   - Uses LoadBalancer service type
    - Configures TLS certificates via cert-manager
+   - Configures DNS via external dns
 
-3. Celeborn Integration
-   - Provides external shuffle service
-   - Enhances performance for large-scale data processing
-   - Reduces memory pressure on Spark executors
-
-4. Hive Metastore Integration
-   - Enables metadata management
-   - Supports table and partition management
-   - Facilitates data governance
 
 ## Security
 
@@ -74,11 +67,11 @@ The chart deploys the following components:
 ## Notes
 
 - The chart provides flexibility in deployment options:
-  - Direct cluster access
-  - NGINX-based external access
-- Object storage integration requires proper secret and trust bundle configuration
-- External DNS is used for automatic DNS record management (when enabled)
-- Trust manager is used for certificate management (when required)
+  - Direct Spark cluster access via Port-Forwarding
+  - NGINX-based external access through the integration with cert-manger and external-dns
+- Object storage integration requires proper secret and trust bundle configuration (in case you're using a self-signed CA)
+- External DNS is used for automatic DNS record management (when pre-installed and pre-configured on your cluster)
+- Trust manager is used for certificate management (when pre-installed and pre-configured on your cluster)
 
 ## Development
 
@@ -86,16 +79,12 @@ For development guidelines and contribution instructions, please refer to the [c
 
 ## ToDo
 
-- Implement authentication
-- Add Spark History Server integration
-- Optimize sizing and autoscaling
-- Improve EDP-specific configurations
-- Integrate with APISIX for enhanced security
+- Implement authentication & authorization
+- Add Spark History Server deployment option
+- Integrate with APISIX for enhanced security 
 - Add support for multiple object storage providers
-- Add support for custom resource definitions (CRDs)
-- Add support for custom metrics and monitoring
-- Add support for custom logging configurations
-- Add support for custom network policies
+- Add support for Observability
+
 
 ## License
 
