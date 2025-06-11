@@ -7,11 +7,11 @@ image:
   # Examples: 
   # - "apache/spark"
   # - "ghcr.io/organization/spark"
-  repository: registry.bare.pandrosion.org/zerocarbon/team-a/projects/deploy/spark-connect-kubernetes
+  repository: loco144/spark-connect
   
   # Image tag
   # Examples: "3.5.4", "latest", "3.5.4-java17-python"
-  tag: 3.5.4-java17-python
+  tag: 3.5.4
   
   # Image pull policy
   # Possible values: Always, IfNotPresent, Never
