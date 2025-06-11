@@ -3,6 +3,10 @@
 # **/charts/*.tgz
 values_EDP.yaml
 
+### macOS
+.DS_Store
+**/.DS_Store
+
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/
