@@ -1,0 +1,23 @@
+{{- if and .Values.objectStorage.sslTrust.enabled .Values.objectStorage.sslTrust.bundle.enabled }}
+apiVersion: trust.cert-manager.io/v1alpha1
+kind: Bundle
+metadata:
+  name: {{ .Values.objectStorage.sslTrust.bundle.name }}
+  namespace: {{ .Values.objectStorage.sslTrust.bundle.namespace }}
+  labels:
+    {{- include "spark.labels" . | nindent 4 }}
+spec:
+  sources:
+    - secret:
+        name: {{ .Values.objectStorage.sslTrust.bundle.source.secretName }}
+        key: {{ .Values.objectStorage.sslTrust.bundle.source.secretKey }}
+  targets:
+    - configMap:
+        key: "{{ .Values.objectStorage.sslTrust.bundle.target.baseName }}.pem"
+    - configMap:
+        key: "{{ .Values.objectStorage.sslTrust.bundle.target.baseName }}.jks"
+        password: {{ .Values.objectStorage.sslTrust.trustManager.password | quote }}
+    - configMap:
+        key: "{{ .Values.objectStorage.sslTrust.bundle.target.baseName }}.p12"
+        password: {{ .Values.objectStorage.sslTrust.trustManager.password | quote }}
+{{- end }} 

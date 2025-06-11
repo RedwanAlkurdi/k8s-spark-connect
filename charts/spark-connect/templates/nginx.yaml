@@ -1,0 +1,174 @@
+{{- if .Values.nginx.enabled }}
+{{- if .Values.nginx.certificate.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "spark.fullname" . }}-nginx-cert
+  labels:
+    {{- include "spark.labels" . | nindent 4 }}
+spec:
+  issuerRef:
+    name: {{ .Values.nginx.certificate.issuerRef.name }}
+    kind: {{ .Values.nginx.certificate.issuerRef.kind }}
+  dnsNames:
+    {{- toYaml .Values.nginx.certificate.dnsNames | nindent 4 }}
+  secretName: {{ .Values.nginx.certificate.secretName }}
+---
+{{- end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "spark.fullname" . }}-nginx-config
+  labels:
+    {{- include "spark.labels" . | nindent 4 }}
+data:
+  demo.conf: |
+    # Enable HTTP/2 globally
+    http2 on;
+
+    # gRPC server for Spark Connect
+    server {
+      listen 443 ssl http2;
+      ssl_certificate /etc/ssl/demo/tls.crt;
+      ssl_certificate_key /etc/ssl/demo/tls.key;
+      server_name {{ index .Values.nginx.certificate.dnsNames 0 }};
+
+      # SSL configurations
+      ssl_protocols TLSv1.2 TLSv1.3;
+      ssl_ciphers HIGH:!aNULL:!MD5;
+      ssl_session_timeout 1d;
+      ssl_session_cache shared:SSL:50m;
+      ssl_session_tickets off;
+
+      # gRPC specific settings for large files
+      grpc_read_timeout 6h;
+      grpc_send_timeout 6h;
+      grpc_socket_keepalive on;
+      grpc_buffer_size 32m;
+      grpc_connect_timeout 600s;
+      
+      # Large file handling settings
+      client_max_body_size 0;
+      client_body_buffer_size 32m;
+      client_body_timeout 600s;
+      keepalive_timeout 600s;
+      send_timeout 600s;
+      
+      # Header and buffer settings
+      large_client_header_buffers 8 64k;
+      http2_body_preread_size 32m;
+      http2_chunk_size 32m;
+
+      location / {
+        # Proxy settings for large files
+        proxy_buffer_size 32m;
+        proxy_buffers 8 32m;
+        proxy_busy_buffers_size 64m;
+        proxy_temp_file_write_size 64m;
+        proxy_max_temp_file_size 2048m;
+        
+        # Timeouts
+        proxy_connect_timeout 600s;
+        proxy_send_timeout 600s;
+        proxy_read_timeout 600s;
+        
+        grpc_pass grpc://{{ include "spark.fullname" . }}-expose.{{ .Release.Namespace }}.svc.cluster.local:15002;
+        grpc_set_header Host $host;
+        grpc_set_header X-Real-IP $remote_addr;
+        grpc_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        grpc_set_header X-Forwarded-Proto $scheme;
+      }
+    }
+
+    # HTTPS server for Spark UI
+    server {
+      listen 443 ssl http2;
+      ssl_certificate /etc/ssl/demo/tls.crt;
+      ssl_certificate_key /etc/ssl/demo/tls.key;
+      server_name {{ index .Values.nginx.certificate.dnsNames 1 }};
+
+      # SSL configurations
+      ssl_protocols TLSv1.2 TLSv1.3;
+      ssl_ciphers HIGH:!aNULL:!MD5;
+      ssl_session_timeout 1d;
+      ssl_session_cache shared:SSL:50m;
+      ssl_session_tickets off;
+
+      location / {
+        # Explicitly disable SSL for upstream
+        proxy_ssl_server_name off;
+        proxy_ssl_verify off;
+        
+        proxy_pass http://{{ include "spark.fullname" . }}-expose.{{ .Release.Namespace }}.svc.cluster.local:4040;
+        
+        # Force HTTP/1.1 for upstream
+        proxy_http_version 1.1;
+        
+        # Clear any existing Upgrade headers to prevent protocol switching
+        proxy_set_header Upgrade "";
+        proxy_set_header Connection "";
+        
+        # Standard proxy headers
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Timeouts for long-running pages
+        proxy_connect_timeout 600s;
+        proxy_send_timeout 600s;
+        proxy_read_timeout 600s;
+      }
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "spark.fullname" . }}-nginx
+  labels:
+    {{- include "spark.labels" . | nindent 4 }}
+    app: nginx
+spec:
+  imagePullSecrets:
+    {{- toYaml .Values.nginx.image.pullSecrets | nindent 4 }}
+  containers:
+    - name: nginx
+      image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}"
+      imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+      ports:
+        - containerPort: {{ .Values.nginx.service.port }}
+          name: https
+      volumeMounts:
+        - name: tls
+          mountPath: /etc/ssl/demo
+        - name: config
+          mountPath: /etc/nginx/conf.d/demo.conf
+          subPath: demo.conf
+  volumes:
+    - name: tls
+      secret:
+        secretName: {{ .Values.nginx.certificate.secretName }}
+    - name: config
+      configMap:
+        name: {{ include "spark.fullname" . }}-nginx-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "spark.fullname" . }}-nginx
+  labels:
+    {{- include "spark.labels" . | nindent 4 }}
+  {{- with .Values.nginx.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    app: nginx
+  type: {{ .Values.nginx.service.type }}
+  ports:
+    - name: https
+      protocol: TCP
+      port: {{ .Values.nginx.service.port }}
+      targetPort: {{ .Values.nginx.service.targetPort }}
+{{- end }} 

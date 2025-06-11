@@ -1,0 +1,177 @@
+name: Release Helm Chart and Docker Image
+
+on:
+  push:
+    tags:
+      - "*.*.*"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SEMVER_PATTERN: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  HELM_REGISTRY: ghcr.io
+  HELM_REPOSITORY: ${{ github.repository_owner }}/helm-charts
+  RELEASE_VERSION: ${{ github.ref_name }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if tag exists
+        run: |
+          git fetch --tags
+          if git tag -l | grep -q "^${VERSION}$"; then
+            echo "Tag '${{ env.RELEASE_VERSION }}' already exists."
+            exit 1
+          else
+            echo "Tag '${{ env.RELEASE_VERSION }}' does not exist."
+          fi
+
+  docker-build-publish:
+    needs: [check]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 #v3.5.0
+        with:
+          cosign-release: 'v2.2.4'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
+
+
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
+        with:
+          context: "{{defaultContext}}:docker"
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Sign the published Docker image
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
+          TAGS: ${{ steps.meta.outputs.tags }}
+          DIGEST: ${{ steps.build-and-push.outputs.digest }}
+        run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+
+  release_helm_charts:
+    needs: [docker-build-publish]
+    permissions:
+      contents: write
+      packages: write
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.2.0
+        with:
+          version: v3.14.4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.HELM_REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Read version from VERSION file
+        run: |
+          echo "VERSION=${{ env.RELEASE_VERSION }}" >> $GITHUB_ENV
+
+      - name: Package Helm charts
+        run: |
+          for chart in $(ls charts); do
+            helm package charts/${chart} --version ${RELEASE_VERSION}
+          done
+
+      - name: Upload charts to GHCR
+        run: |
+          for pkg in $(ls *.tgz); do
+            helm push ${pkg} oci://${{ env.HELM_REGISTRY }}/${{ env.HELM_REPOSITORY }}
+          done
+
+      - name: Save packaged charts to temp directory
+        run: |
+          mkdir -p /tmp/charts
+          cp *.tgz /tmp/charts
+
+      - name: Checkout to branch gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+
+      - name: Copy packaged charts
+        run: |
+          cp /tmp/charts/*.tgz .
+
+      - name: Update Helm charts repo index
+        env:
+          CHART_URL: https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}
+        run: |
+          helm repo index --merge index.yaml --url ${CHART_URL} .
+          git add index.yaml
+          git commit -s -m "Add index for Spark connect chart ${VERSION}" || exit 0
+          git push
+    
+
+      - name: Release
+        id: release
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: "Spark connect ${{ env.VERSION }}"
+          tag_name: ${{ github.tag_name }}
+          prerelease: ${{ contains(env.VERSION, 'rc') }}
+          target_commitish: ${{ github.sha }}
+          files: |
+            *.tgz
