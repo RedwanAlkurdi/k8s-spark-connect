@@ -1,0 +1,310 @@
+# Number of replicas for the Spark Connect server
+replicaCount: 1
+
+# Image configuration for the Spark Connect server
+image:
+  # Docker image repository
+  # Examples: 
+  # - "apache/spark"
+  # - "ghcr.io/organization/spark"
+  repository: loco144/spark-connect
+  
+  # Image tag
+  # Examples: "3.5.4", "latest", "3.5.4-java17-python"
+  tag: 3.5.4
+  
+  # Image pull policy
+  # Possible values: Always, IfNotPresent, Never
+  pullPolicy: Always
+  
+  # Image pull secrets configuration
+  # Example:
+  # imagePullSecrets:
+  #   - name: regcred
+  imagePullSecrets: 
+    - name: regcred
+
+# Override the name of resources created by the chart
+# If empty, uses the chart name
+nameOverride: ""
+
+# Override the full name of resources created by the chart
+# If empty, uses release name + chart name
+fullnameOverride: ""
+
+# Spark configuration
+spark:
+  # Event log configuration for Spark History Server integration
+  eventLog:
+    # Whether to enable event logging
+    # Possible values: true, false
+    enabled: true
+    # Directory where Spark event logs will be stored
+    # P.S.: if you want to use s3a, you need to create a secret with the access key and secret key and a config map with the trust bundle
+    # Examples:
+    # - "s3a://spark-logs"
+    # - "hdfs://namenode:8020/spark-logs" s3a://spark-test/logs
+    dir: ""
+
+  # Celeborn configuration for external shuffle service
+  celeborn:
+    # Whether to enable Celeborn
+    # Possible values: true, false
+    enabled: false
+    # Celeborn master endpoints
+    # Example: "celeborn-master-0.celeborn:9097"
+    masterEndpoints: ""
+
+  # Dynamic allocation configuration
+  dynamicAllocation:
+    # Whether to enable dynamic allocation
+    # Possible values: true, false
+    enabled: true
+
+  # Driver configuration
+  driver:
+    # Number of CPU cores for the driver
+    # Example values: 1, 2, 4
+    cores: 2
+    
+    # Driver memory in MiB
+    # Example values: 1024, 2048, 4096
+    memoryMiB: 2048
+    
+    # Driver memory overhead in MiB
+    # Example values: 384, 512, 1024
+    memoryOverheadMiB: 384
+    
+    # Ephemeral local volume configuration
+    # Example:
+    # ephemeralLocalVolume:
+    #   name: "spark-local"
+    #   storageClass: "local-storage"
+    #   storageGiB: 10
+    ephemeralLocalVolume: {}
+    
+    # Driver pod affinity rules
+    affinity: {}
+    
+    # Driver pod tolerations
+    tolerations: []
+
+  # Executor configuration
+  executor:
+    # Number of CPU cores for each executor
+    cores: 1
+    
+    # CPU request in milliCPU for each executor
+    # Example values: 1000 (1 core), 2000 (2 cores)
+    requestCoresMilliCPU: 2000
+    
+    # Executor memory in MiB
+    memoryMiB: 2048
+    
+    # Executor memory overhead in MiB
+    memoryOverheadMiB: 384
+    
+    # Ephemeral local volume configuration for executors
+    ephemeralLocalVolume: {}
+    
+    # Minimum number of executors
+    minExecutors: 1
+    
+    # Maximum number of executors
+    maxExecutors: 4
+    
+    # Executor pod affinity rules
+    affinity: {}
+    
+    # Executor pod tolerations
+    tolerations: []
+    
+    # Additional labels for executor pods
+    labels: {}
+
+  # Temporary directory for Spark
+  # Example: "/tmp"
+  scratchDir: /tmp
+  
+  # Kubernetes API endpoint
+  # Default uses in-cluster configuration
+  kubernetesEndpoint: "https://kubernetes.default.svc.cluster.local:443"
+  
+  # Additional Spark packages to include
+  # Example: ["org.apache.spark:spark-streaming-kafka-0-10_2.12:3.5.4"]
+  packages: []
+  
+  # Additional Spark configurations
+  sparkConfig:
+    spark.hadoop.parquet.block.size: "33554432"
+    spark.driver.maxResultSize: 4g
+
+  # Catalog configuration for Hive metastore
+  catalog:
+    # Whether to enable Hive catalog
+    # Possible values: true, false
+    enabled: false
+    # ConfigMap containing hive-site.xml
+    hiveMetastoreConfigMap: spark-connect-hive
+
+# Service account configuration
+serviceAccount:
+  # Whether to create a service account
+  # Possible values: true, false
+  create: true
+  # Annotations for the service account
+  annotations: {}
+  # Name of the service account
+  # If not set and create is true, a name is generated
+  name: "spark-connect"
+  # Whether to automount API credentials
+  # Possible values: true, false
+  automountServiceAccountToken: true
+
+# Service configuration
+service:
+  # Whether to create a service
+  # Possible values: true, false
+  create: true
+  # Service annotations
+  annotations: {}
+  # Service name
+  name: "spark-connect"
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod security context
+podSecurityContext: {}
+
+# Container security context
+securityContext:
+  runAsUser: 185
+  runAsGroup: 185
+
+# Additional command to run in the container
+command: []
+
+# Additional arguments for the command
+extraArgs: []
+
+# Additional environment variables
+extraEnv: []
+
+
+# Container ports configuration
+containerPorts:
+  # Port for Spark UI
+  sparkUi: 4040
+  # Port for Spark Connect
+  sparkConnect: 15002
+
+# Object Storage Integration
+objectStorage:
+  # Whether to enable Object Storage integration
+  # Possible values: true, false
+  enabled: false
+  
+  # Object Storage endpoint URL
+  # Example: "https://minio-c2-api.minio.net"
+  endpoint: ""
+  
+  # Secret configuration for Object Storage credentials
+  secret:
+    # Name of the Kubernetes secret containing Object Storage credentials
+    # Example: "minio-secret"
+    name: "minio-secret"
+    
+    # Key in the secret containing the access key
+    # Example: "accessKey"
+    accessKeyRef: "accessKey"
+    
+    # Key in the secret containing the secret key
+    # Example: "secretKey"
+    secretKeyRef: "secretKey"
+  
+  # SSL trust configuration for Object Storage
+  sslTrust:
+    # Whether to enable SSL trust configuration (if you're using a self-signed CA)
+    # Possible values: true, false
+    enabled: false
+    
+    # Trust manager configuration
+    trustManager:
+      # Name of the ConfigMap containing the trust bundle
+      # Example: "edp-ca"
+      configMapName: "edp-ca"
+      
+      # Key in the ConfigMap containing the JKS trust store
+      # Example: "nzero.de.jks"
+      configMapKey: "nzero.de.jks"
+      
+      # Path where the trust bundle will be mounted in the spark pods
+      # Example: "/etc/ssl/certs/object-storage"
+      mountPath: "/etc/ssl/certs/object-storage"
+
+      # JKS truststore password (required for JKS format)
+      # Default password used by Java keytool
+      password: "changeit"
+
+    # Bundle configuration for generating trust bundle based of a kubernetes secret containing the CA certificate
+    bundle:
+      # Whether to create the Bundle resource
+      # Possible values: true, false
+      enabled: false
+      
+      # Name of the Bundle resource
+      # This will also be used as the name of the generated ConfigMap
+      name: "edp-ca"
+
+      # Namespace where the Bundle and ConfigMap will be created
+      # This should typically be "ca-bundles"
+      namespace: "ca-bundles"
+      
+      # Source configuration for the Bundle
+      source:
+        # Name of the secret containing the root CA
+        secretName: "nzero.de"
+        # Key in the secret containing the root CA certificate
+        secretKey: "netzerocloud-nzero.de-rootca-crt.pem"
+      
+      # Target configuration
+      target:
+        # Base name for the generated files
+        # Example: if baseName is "nzero.de", files will be nzero.de.pem, nzero.de.jks, etc.
+        baseName: "nzero.de"
+
+# Nginx configuration
+nginx:
+  # Whether to enable nginx
+  # Possible values: true, false
+  enabled: false
+
+  # Image configuration
+  image:
+    repository: europe-west3-docker.pkg.dev/nz-mgmt-shared-artifacts-8c85/docker-hub/nginx
+    tag: latest
+    pullPolicy: Always
+    pullSecrets:
+      - name: regcred
+
+  # Service configuration
+  service:
+    type: LoadBalancer
+    port: 443
+    targetPort: https
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: spark-connect.zerocarbon-1.nzero.net,spark-ui.zerocarbon-1.nzero.net
+
+  # Certificate configuration
+  certificate:
+    enabled: true
+    issuerRef:
+      name: platform-issuer
+      kind: ClusterIssuer
+    dnsNames:
+      - spark-connect.zerocarbon-1.nzero.net
+      - spark-ui.zerocarbon-1.nzero.net
+    secretName: nginx-tls
+
+
