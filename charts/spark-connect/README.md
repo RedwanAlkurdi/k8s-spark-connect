@@ -1,6 +1,6 @@
 # Spark Connect Helm Chart
 
-This Helm chart deploys Spark Connect on Kubernetes, providing a service for connecting to Apache Spark clusters.
+This Helm chart deploys Spark Connect on Kubernetes.
 
 ## Prerequisites
 
@@ -11,11 +11,13 @@ Before installing this chart, ensure you have the following:
 - Helm 3.x
 
 ### Required Secrets
-- Object Storage secret with access key and secret key (if using object storage)
-- Registry credentials secret (regcred) for pulling images
+- Registry credentials secret for pulling images (if using a private registry)
 
-### Required ConfigMaps
-- ConfigMap with the trust bundle (if using object storage)
+### Optional Secrets
+- Object Storage secret with access key and secret key (if using object storage)
+
+### Optional ConfigMaps
+- ConfigMap with the trust bundle (if using object storage and a self-signed CA)
 
 ### Required Components
 - cert-manager cluster issuer (platform-issuer) - if exposing via nginx
@@ -48,8 +50,8 @@ The following table lists the configurable parameters of the Spark Connect chart
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `replicaCount` | Number of Spark Connect server replicas | `1` |
-| `image.repository` | Docker image repository | `registry.bare.pandrosion.org/zerocarbon/team-a/projects/deploy/spark-connect-kubernetes` |
-| `image.tag` | Docker image tag | `3.5.4-java17-python` |
+| `image.repository` | Docker image repository | `loco144/spark-connect` |
+| `image.tag` | Docker image tag | `3.5.4` |
 | `image.pullPolicy` | Image pull policy | `Always` |
 | `image.imagePullSecrets` | Image pull secrets | `[{name: regcred}]` |
 | `nameOverride` | Override the name of resources | `""` |
@@ -67,7 +69,7 @@ The following table lists the configurable parameters of the Spark Connect chart
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `spark.eventLog.enabled` | Enable event logging | `true` |
-| `spark.eventLog.dir` | Event log directory | `s3a://spark-test/logs` |
+| `spark.eventLog.dir` | Event log directory | `""` |
 | `spark.celeborn.enabled` | Enable Celeborn for shuffle service | `false` |
 | `spark.celeborn.masterEndpoints` | Celeborn master endpoints | `""` |
 | `spark.dynamicAllocation.enabled` | Enable dynamic allocation | `true` |
@@ -90,7 +92,7 @@ The following table lists the configurable parameters of the Spark Connect chart
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `nginx.enabled` | Enable/disable NGINX | `true` |
+| `nginx.enabled` | Enable/disable NGINX | `false` |
 | `nginx.image.repository` | NGINX image repository | `europe-west3-docker.pkg.dev/nz-mgmt-shared-artifacts-8c85/docker-hub/nginx` |
 | `nginx.image.tag` | NGINX image tag | `latest` |
 | `nginx.image.pullPolicy` | NGINX image pull policy | `Always` |
@@ -107,12 +109,12 @@ The following table lists the configurable parameters of the Spark Connect chart
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `objectStorage.enabled` | Enable/disable object storage | `true` |
-| `objectStorage.endpoint` | Object storage endpoint | `https://minio-c2-api.sxp-1.nzero.net` |
+| `objectStorage.enabled` | Enable/disable object storage | `false` |
+| `objectStorage.endpoint` | Object storage endpoint | `""` |
 | `objectStorage.secret.name` | Secret name for object storage credentials | `minio-secret` |
 | `objectStorage.secret.accessKeyRef` | Key in secret for access key | `accessKey` |
 | `objectStorage.secret.secretKeyRef` | Key in secret for secret key | `secretKey` |
-| `objectStorage.sslTrust.enabled` | Enable/disable SSL trust | `true` |
+| `objectStorage.sslTrust.enabled` | Enable/disable SSL trust | `false` |
 | `objectStorage.sslTrust.trustManager.configMapName` | ConfigMap name for trust bundle | `edp-ca` |
 | `objectStorage.sslTrust.trustManager.configMapKey` | Key in ConfigMap for trust store | `nzero.de.jks` |
 | `objectStorage.sslTrust.trustManager.mountPath` | Path to mount trust bundle | `/etc/ssl/certs/object-storage` |
@@ -138,28 +140,6 @@ The following table lists the configurable parameters of the Spark Connect chart
 | `podAnnotations` | Additional pod annotations | `{}` |
 | `podSecurityContext` | Pod security context | `{}` |
 
-## Architecture
-
-The chart deploys the following components:
-
-1. **Spark Connect StatefulSet**
-   - Runs the Spark Connect service
-   - Configures object storage integration
-   - Manages SSL trust configuration
-
-2. **NGINX Service**
-   - Provides SSL termination
-   - Routes traffic to Spark UI and Spark Connect
-   - Uses LoadBalancer service type
-   - Configures TLS certificates via cert-manager
-
-## Security
-
-- SSL/TLS termination is handled by NGINX
-- Object storage integration supports SSL trust configuration
-- Registry credentials are managed via Kubernetes secrets
-- Certificates are managed by cert-manager
-
 ## Usage
 
 ### Basic Installation
@@ -172,7 +152,6 @@ helm install spark-connect spark-connect/spark-connect
 
 ```bash
 helm install spark-connect spark-connect/spark-connect \
-  --set nginx.enabled=true \
   --set objectStorage.enabled=true \
   --set objectStorage.endpoint="https://your-minio-endpoint"
 ```
