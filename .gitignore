@@ -8,10 +8,9 @@ values_EDP.yaml
 **/.DS_Store
 
 ### EDP CA
-examples/EDP_CA/
-EDP_CA/**
-**/EDP_CA/
-**/EDP_CA/**
+examples/EDP_CA
+example/EDP_CA/**
+
 
 ### Python template
 # Byte-compiled / optimized / DLL files
