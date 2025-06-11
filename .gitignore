@@ -7,6 +7,12 @@ values_EDP.yaml
 .DS_Store
 **/.DS_Store
 
+### EDP CA
+EDP_CA/
+EDP_CA/**
+**/EDP_CA/
+**/EDP_CA/**
+
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/
