@@ -162,6 +162,21 @@ helm install spark-connect spark-connect/spark-connect \
 helm install spark-connect spark-connect/spark-connect -f values.yaml
 ```
 
+## Connecting to Spark Connect Server
+
+You can connect to your Spark Connect server from your own IDE. We provide example code in both Python and Java to help you get started.
+
+### Example Code
+
+Check out our examples in the `examples` directory:
+- Python examples: `examples/python/`
+- Java examples: `examples/java/`
+
+These examples demonstrate how to:
+- Connect to the Spark Connect server
+- Execute queries
+- Manage Spark sessions
+
 ## Development
 
 ### Building from Source
