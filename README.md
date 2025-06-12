@@ -47,7 +47,7 @@ For detailed configuration options, please refer to the [chart's README](charts/
 
 The chart deploys/configures the following components:
 
-![Spark Connect Architecture](./assets/spark_connect_architecture.svg)
+![Spark Connect Architecture](./assets/Arch.png)
 
 
 1. Spark Connect
