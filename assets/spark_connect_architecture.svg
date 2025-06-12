@@ -223,5 +223,26 @@
   <!-- Trust Manager to Spark Connect -->
   <path d="M 510 210 L 570 250" stroke="#fcb69f" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
   
-
+  <!-- Modern Legend with glassmorphism -->
+  <g id="legend">
+    <rect x="600" y="650" width="280" height="130" rx="20" fill="#ffffff" opacity="0.1" 
+          stroke="#64ffda" stroke-width="1" filter="url(#shadow)"/>
+    <rect x="600" y="650" width="280" height="130" rx="20" fill="none" 
+          stroke="#ffffff" stroke-width="1" opacity="0.2"/>
+    <text x="740" y="675" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="16" font-weight="600" fill="#ffffff">
+      Legend
+    </text>
+    
+    <line x1="620" y1="695" x2="650" y2="695" stroke="#64ffda" stroke-width="3" filter="url(#glow)"/>
+    <text x="660" y="700" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#ffffff">Required Connection</text>
+    
+    <line x1="620" y1="715" x2="650" y2="715" stroke="#bb86fc" stroke-width="2" stroke-dasharray="8,4"/>
+    <text x="660" y="720" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#ffffff">Optional Connection</text>
+    
+    <rect x="620" y="730" width="20" height="15" rx="3" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="8,4"/>
+    <text x="660" y="742" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#ffffff">Optional Component</text>
+    
+    <rect x="620" y="750" width="20" height="15" rx="3" fill="#ff6b6b" stroke="#ff6b6b" stroke-width="2"/>
+    <text x="660" y="762" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#ffffff">Core Component</text>
+  </g>
 </svg>
