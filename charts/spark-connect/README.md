@@ -214,6 +214,15 @@ helm template spark-connect charts/spark-connect
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
+## Contact & Support
+
+### FABBricate
+- **Company**: FABBricate IT Solutions GmbH
+- **Website**: [www.fabbricate.io](https://www.fabbricate.io/en)
+- **Email**: [contact@fabbricate.io](mailto:contact@fabbricate.io)
+
+For any questions, issues, or support regarding this Helm chart, please don't hesitate to contact us.
+
 ## Acknowledgments
 
 - Apache Spark
