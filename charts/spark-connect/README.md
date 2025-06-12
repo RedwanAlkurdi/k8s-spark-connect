@@ -32,7 +32,7 @@ Before installing this chart, ensure you have the following:
 
 ```bash
 # Add the Helm repository
-helm repo add spark-connect https://mhdredwanalkurdi.github.io/k8s-spark-connect
+helm repo add spark-connect oci://ghcr.io/redwanalkurdi/helm-charts
 
 # Update the repository
 helm repo update

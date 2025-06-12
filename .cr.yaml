@@ -1,0 +1,8 @@
+owner: redwanalkurdi
+git-repo: k8s-spark-connect
+charts-repo: https://github.com/redwanalkurdi/helm-charts
+pages-branch: gh-pages
+index-path: index.yaml
+package-with: helm
+push: true
+target-branch: main 
