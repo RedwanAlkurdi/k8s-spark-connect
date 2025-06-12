@@ -1,5 +1,10 @@
 # Spark Connect Helm Chart
 
+[![Release](https://img.shields.io/github/v/release/redwanalkurdi/k8s-spark-connect?style=flat-square)](https://github.com/redwanalkurdi/k8s-spark-connect/releases)
+[![License](https://img.shields.io/github/license/redwanalkurdi/k8s-spark-connect?style=flat-square)](LICENSE)
+[![Docker Image](https://img.shields.io/badge/docker-ghcr.io%2Fredwanalkurdi%2Fk8s--spark--connect-blue?style=flat-square)](https://github.com/redwanalkurdi/k8s-spark-connect/pkgs/container/k8s-spark-connect)
+[![Helm Chart](https://img.shields.io/badge/helm-k8s--spark--connect-red?style=flat-square)](https://github.com/redwanalkurdi/k8s-spark-connect/tree/main/charts/spark-connect)
+
 This Helm chart deploys Spark Connect on Kubernetes, providing a service for connecting to Apache Spark clusters.
 
 ## Prerequisites
