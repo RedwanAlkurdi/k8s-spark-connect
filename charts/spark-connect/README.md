@@ -32,13 +32,13 @@ Before installing this chart, ensure you have the following:
 
 ```bash
 # Add the Helm repository
-helm repo add spark-connect oci://ghcr.io/redwanalkurdi/helm-charts
+helm repo add k8s-spark-connect https://redwanalkurdi.github.io/k8s-spark-connect/
 
 # Update the repository
 helm repo update
 
 # Install the chart
-helm install spark-connect spark-connect/spark-connect
+helm install test k8s-spark-connect/spark-connect --version 0.0.1
 ```
 
 ## Configuration

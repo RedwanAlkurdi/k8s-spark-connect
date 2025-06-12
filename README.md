@@ -26,12 +26,17 @@ This Helm chart deploys Spark Connect on Kubernetes, providing a service for con
 
 1. Add the Helm repository:
 ```bash
-helm repo add spark-connect oci://ghcr.io/redwanalkurdi/helm-charts
+helm repo add k8s-spark-connect https://redwanalkurdi.github.io/k8s-spark-connect/
 ```
 
-2. Install the chart:
+2. Update the repository:
 ```bash
-helm install spark-connect spark-connect/spark-connect
+helm repo update
+```
+
+3. Install the chart:
+```bash
+helm install test k8s-spark-connect/spark-connect --version 0.0.1
 ```
 
 ## Configuration
