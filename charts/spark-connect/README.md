@@ -38,7 +38,7 @@ helm repo add k8s-spark-connect https://redwanalkurdi.github.io/k8s-spark-connec
 helm repo update
 
 # Install the chart
-helm install test k8s-spark-connect/spark-connect --version 0.0.1
+helm install test k8s-spark-connect/spark-connect --version 0.0.2
 ```
 
 ## Configuration
@@ -51,7 +51,7 @@ The following table lists the configurable parameters of the Spark Connect chart
 |-----------|-------------|---------|
 | `replicaCount` | Number of Spark Connect server replicas | `1` |
 | `image.repository` | Docker image repository | `ghcr.io/redwanalkurdi/k8s-spark-connect` |
-| `image.tag` | Docker image tag | `0.0.1` |
+| `image.tag` | Docker image tag | `0.0.2` |
 | `image.pullPolicy` | Image pull policy | `Always` |
 | `image.imagePullSecrets` | Image pull secrets | `[{name: regcred}]` |
 | `nameOverride` | Override the name of resources | `""` |
@@ -145,7 +145,7 @@ The following table lists the configurable parameters of the Spark Connect chart
 ### Basic Installation
 
 ```bash
-helm install spark-connect spark-connect/spark-connect
+helm install test k8s-spark-connect/spark-connect --version 0.0.2
 ```
 
 ### With Custom Values

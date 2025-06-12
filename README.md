@@ -36,7 +36,7 @@ helm repo update
 
 3. Install the chart:
 ```bash
-helm install test k8s-spark-connect/spark-connect --version 0.0.1
+helm install test k8s-spark-connect/spark-connect --version 0.0.2
 ```
 
 ## Configuration
