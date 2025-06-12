@@ -1,0 +1,17 @@
+apiVersion: v1
+entries:
+  spark-connect:
+  - apiVersion: v2
+    appVersion: 3.5.4
+    created: "2025-06-12T12:42:53.522462612Z"
+    description: A Helm chart for deploying a Spark-Connect Server on Kubernetes
+    digest: b1b136b857a8867fe5bc5b4051518ae5e0133d65c9dd60a4acb0fba573392a25
+    maintainers:
+    - email: redwanalkurdi@gmail.com
+      name: Redwan Alkurdi
+    name: spark-connect
+    type: application
+    urls:
+    - https://github.com/RedwanAlkurdi/k8s-spark-connect/releases/download/0.0.2/spark-connect-0.0.2.tgz
+    version: 0.0.2
+generated: "2025-06-12T12:42:53.521530294Z"
