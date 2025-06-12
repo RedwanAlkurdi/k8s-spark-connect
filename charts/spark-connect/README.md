@@ -50,8 +50,8 @@ The following table lists the configurable parameters of the Spark Connect chart
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `replicaCount` | Number of Spark Connect server replicas | `1` |
-| `image.repository` | Docker image repository | `loco144/spark-connect` |
-| `image.tag` | Docker image tag | `3.5.4` |
+| `image.repository` | Docker image repository | `ghcr.io/redwanalkurdi/k8s-spark-connect` |
+| `image.tag` | Docker image tag | `0.0.1` |
 | `image.pullPolicy` | Image pull policy | `Always` |
 | `image.imagePullSecrets` | Image pull secrets | `[{name: regcred}]` |
 | `nameOverride` | Override the name of resources | `""` |
