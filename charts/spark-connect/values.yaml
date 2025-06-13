@@ -11,7 +11,7 @@ image:
   
   # Image tag
   # Examples: "3.5.4", "latest", "3.5.4-java17-python"
-  tag: "0.0.2"
+  tag: "0.0.3"
   
   # Image pull policy
   # Possible values: Always, IfNotPresent, Never
