@@ -72,7 +72,7 @@ data:
         proxy_send_timeout 600s;
         proxy_read_timeout 600s;
         
-        grpc_pass grpc://{{ include "spark.fullname" . }}-expose.{{ .Release.Namespace }}.svc.cluster.local:15002;
+        grpc_pass grpc://{{ include "spark.serviceName" . }}-expose.{{ .Release.Namespace }}.svc.cluster.local:15002;
         grpc_set_header Host $host;
         grpc_set_header X-Real-IP $remote_addr;
         grpc_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -99,7 +99,7 @@ data:
         proxy_ssl_server_name off;
         proxy_ssl_verify off;
         
-        proxy_pass http://{{ include "spark.fullname" . }}-expose.{{ .Release.Namespace }}.svc.cluster.local:4040;
+        proxy_pass http://{{ include "spark.serviceName" . }}-expose.{{ .Release.Namespace }}.svc.cluster.local:4040;
         
         # Force HTTP/1.1 for upstream
         proxy_http_version 1.1;
